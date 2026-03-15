@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080808">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="THE BETWEEN">
+<title>THE BETWEEN</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23080808'/%3E%3Ccircle cx='210' cy='180' r='10' fill='%23e8e4de' opacity='0.9'/%3E%3Ccircle cx='310' cy='155' r='7' fill='%23e8e4de' opacity='0.6'/%3E%3Ccircle cx='355' cy='230' r='12' fill='%23e8e4de' opacity='0.8'/%3E%3Ccircle cx='245' cy='295' r='7' fill='%23e8e4de' opacity='0.5'/%3E%3Ccircle cx='320' cy='315' r='9' fill='%23e8e4de' opacity='0.7'/%3E%3Ccircle cx='165' cy='270' r='6' fill='%23e8e4de' opacity='0.4'/%3E%3Ccircle cx='370' cy='160' r='5' fill='%23e8e4de' opacity='0.35'/%3E%3Ccircle cx='185' cy='340' r='7' fill='%23e8e4de' opacity='0.5'/%3E%3Ccircle cx='280' cy='220' r='5' fill='%23e8e4de' opacity='0.3'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23080808'/%3E%3Ccircle cx='210' cy='180' r='10' fill='%23e8e4de' opacity='0.9'/%3E%3Ccircle cx='310' cy='155' r='7' fill='%23e8e4de' opacity='0.6'/%3E%3Ccircle cx='355' cy='230' r='12' fill='%23e8e4de' opacity='0.8'/%3E%3Ccircle cx='245' cy='295' r='7' fill='%23e8e4de' opacity='0.5'/%3E%3Ccircle cx='320' cy='315' r='9' fill='%23e8e4de' opacity='0.7'/%3E%3Ccircle cx='165' cy='270' r='6' fill='%23e8e4de' opacity='0.4'/%3E%3Ccircle cx='370' cy='160' r='5' fill='%23e8e4de' opacity='0.35'/%3E%3Ccircle cx='185' cy='340' r='7' fill='%23e8e4de' opacity='0.5'/%3E%3Ccircle cx='280' cy='220' r='5' fill='%23e8e4de' opacity='0.3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+:root {
+  --mono: 'DM Mono', 'Courier New', Courier, monospace;
+  --bg: #080808;
+  --field: #0a0a0a;
+  --border: #181818;
+  --text: #e8e4de;
+  --text-dim: rgba(232,228,222,0.22);
+}
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', 'Courier New', Courier, monospace;
+  font-weight: 300;
+  overflow: hidden;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.45;
+}
+canvas#c {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 10;
+}
+.state {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2.5rem 2rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 1.2s ease;
+  z-index: 20;
+}
+.state.active { opacity: 1; pointer-events: all; }
+
+.title-wrap { text-align: center; margin-bottom: 3.5rem; }
+.app-title {
+  font-family: 'DM Mono', 'Courier New', Courier, monospace;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 5vw, 1.4rem);
+  letter-spacing: 0.55em;
+  color: var(--text);
+  display: block; margin-bottom: 1rem;
+}
+.title-line { display: none; }
+
+.step-label {
+  font-size: 0.6rem; letter-spacing: 0.4em;
+  color: #888880; text-transform: uppercase;
+  margin-bottom: 2.5rem; text-align: center;
+}
+.field-wrap { width: 100%; max-width: 320px; margin-bottom: 0.8rem; }
+textarea {
+  width: 100%; min-height: 110px;
+  background: var(--field);
+  border: 0.5px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  font-family: 'DM Mono', 'Courier New', Courier, monospace;
+  font-weight: 300; font-size: 0.85rem;
+  letter-spacing: 0.03em; line-height: 1.7;
+  padding: 1rem 1.1rem;
+  resize: none; outline: none;
+  transition: border-color 0.4s;
+  caret-color: #444;
+}
+textarea::placeholder { color: #888880; font-weight: 300; }
+textarea:focus { border-color: #282828; }
+
+.char-dots { display: flex; gap: 6px; padding: 0.5rem 0.1rem; min-height: 18px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; opacity: 0; transition: opacity 0.3s; }
+.dot.v { opacity: 0.7; }
+
+.send-btn {
+  width: 100%; max-width: 320px; height: 48px;
+  background: var(--field);
+  border: 0.5px solid var(--border);
+  border-radius: 2px; color: var(--text);
+  font-family: 'DM Mono', 'Courier New', Courier, monospace;
+  font-weight: 300; font-size: 0.75rem;
+  letter-spacing: 0.5em; cursor: pointer;
+  transition: border-color 0.3s, color 0.3s;
+  margin-top: 0.2rem;
+}
+.send-btn:hover { border-color: #2a2a2a; color: rgba(232,228,222,0.7); }
+.send-btn:active { transform: scale(0.99); }
+.send-btn:disabled { opacity: 0.2; cursor: default; }
+
+.sending-text { font-size: 0.7rem; letter-spacing: 0.4em; color: #888880; text-transform: uppercase; font-family: 'DM Mono', 'Courier New', Courier, monospace; font-weight: 300; }
+
+.transition-text {
+  font-size: 0.9rem; letter-spacing: 0.35em;
+  color: var(--text); font-weight: 300;
+  opacity: 0; animation: fadeIn 2s ease 0.8s forwards;
+}
+.begins-text {
+  font-size: 1rem; letter-spacing: 0.35em;
+  color: var(--text); font-weight: 300;
+  opacity: 0; animation: fadeIn 2s ease 0.8s forwards;
+}
+.underway-text {
+  font-size: 0.7rem; letter-spacing: 0.25em;
+  color: #888880; font-weight: 300;
+  margin-top: 0.8rem;
+  opacity: 0; animation: fadeIn 2s ease 1.8s forwards;
+}
+.again-btn {
+  margin-top: 2rem; background: none; border: none;
+  color: #888880; font-family: 'DM Mono', 'Courier New', Courier, monospace;
+  font-weight: 300; font-size: 0.65rem;
+  letter-spacing: 0.35em; cursor: pointer;
+  transition: color 0.4s; text-transform: uppercase;
+  opacity: 0; animation: fadeIn 2s ease 3s forwards;
+}
+.again-btn:hover { color: #aaa; }
+@keyframes fadeIn { to { opacity: 1; } }
+
+
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- STEP 1: GRATITUDE -->
+<div class="state active" id="s-gratitude">
+  <div class="title-wrap">
+    <span class="app-title">THE BETWEEN</span>
+    <div class="title-line"></div>
+  </div>
+  <div class="field-wrap">
+    <textarea id="gratitude" maxlength="280" placeholder="wofür bist du dankbar?"></textarea>
+    <div class="char-dots" id="dots-g"></div>
+  </div>
+  <button class="send-btn" id="send-g" disabled>SENDEN</button>
+</div>
+
+<!-- ANIM: GRATITUDE -->
+<div class="state" id="s-sending-g">
+  <div class="sending-text" id="sending-label"></div>
+</div>
+
+<!-- TRANSITION -->
+<div class="state" id="s-transition">
+  <div class="transition-text" id="transition-label">was wünschst du dir</div>
+</div>
+
+<!-- STEP 2: WISH -->
+<div class="state" id="s-wish">
+  <div class="field-wrap">
+    <textarea id="wish" maxlength="280" placeholder="schreib hier deinen Wunsch"></textarea>
+    <div class="char-dots" id="dots-w"></div>
+  </div>
+  <button class="send-btn" id="send-w" disabled>SENDEN</button>
+</div>
+
+<!-- ANIM: WISH -->
+<div class="state" id="s-sending-w">
+  <div class="sending-text" id="sending-w-label"></div>
+</div>
+
+<!-- DONE -->
+<div class="state" id="s-done">
+  <div class="begins-text" id="begins-label">es beginnt</div>
+  <div class="underway-text" id="underway-label">dein Wunsch ist unterwegs</div>
+  <button class="again-btn" id="again-btn">↩ nochmal</button>
+</div>
+
+
+
+<script>
+const T = {
+  de: { gratitudePlaceholder:'wofür bist du dankbar?', wishPlaceholder:'schreib hier deinen Wunsch', send:'SENDEN', sending:'wird gesendet', transition:'was wünschst du dir', begins:'es beginnt', underway:'dein Wunsch ist unterwegs', again:'↩ nochmal' },
+  en: { gratitudePlaceholder:'what are you grateful for?', wishPlaceholder:'write your wish here', send:'SEND', sending:'sending', transition:'what do you wish for', begins:'it begins', underway:'your wish is on its way', again:'↩ again' },
+  es: { gratitudePlaceholder:'¿por qué estás agradecido?', wishPlaceholder:'escribe tu deseo aquí', send:'ENVIAR', sending:'enviando', transition:'qué deseas', begins:'comienza', underway:'tu deseo está en camino', again:'↩ otra vez' },
+  hu: { gratitudePlaceholder:'miért vagy hálás?', wishPlaceholder:'írd ide a kívánságod', send:'KÜLDÉS', sending:'küldés folyamatban', transition:'mit kívánsz', begins:'elkezdődik', underway:'a kívánságod úton van', again:'↩ újra' },
+  pl: { gratitudePlaceholder:'za co jesteś wdzięczny?', wishPlaceholder:'napisz tutaj swoje życzenie', send:'WYŚLIJ', sending:'wysyłanie', transition:'czego pragniesz', begins:'zaczyna się', underway:'twoje życzenie jest w drodze', again:'↩ jeszcze raz' },
+  ru: { gratitudePlaceholder:'за что ты благодарен?', wishPlaceholder:'напиши здесь своё желание', send:'ОТПРАВИТЬ', sending:'отправляется', transition:'чего ты желаешь', begins:'начинается', underway:'твоё желание в пути', again:'↩ ещё раз' },
+  it: { gratitudePlaceholder:'per cosa sei grato?', wishPlaceholder:'scrivi qui il tuo desiderio', send:'INVIA', sending:'invio in corso', transition:'cosa desideri', begins:'inizia', underway:'il tuo desiderio è in viaggio', again:'↩ ancora' },
+  ro: { gratitudePlaceholder:'pentru ce ești recunoscător?', wishPlaceholder:'scrie aici dorința ta', send:'TRIMITE', sending:'se trimite', transition:'ce îți dorești', begins:'începe', underway:'dorința ta este pe drum', again:'↩ din nou' },
+  fr: { gratitudePlaceholder:'pour quoi es-tu reconnaissant?', wishPlaceholder:'écris ton vœu ici', send:'ENVOYER', sending:'envoi en cours', transition:'que désires-tu', begins:'ça commence', underway:'ton vœu est en chemin', again:'↩ encore' },
+  nl: { gratitudePlaceholder:'waar ben je dankbaar voor?', wishPlaceholder:'schrijf hier je wens', send:'VERZENDEN', sending:'wordt verzonden', transition:'wat wens je', begins:'het begint', underway:'je wens is onderweg', again:'↩ opnieuw' },
+  pt: { gratitudePlaceholder:'pelo que és grato?', wishPlaceholder:'escreve o teu desejo aqui', send:'ENVIAR', sending:'enviando', transition:'o que desejas', begins:'começa', underway:'o teu desejo está a caminho', again:'↩ outra vez' },
+  sv: { gratitudePlaceholder:'vad är du tacksam för?', wishPlaceholder:'skriv din önskan här', send:'SKICKA', sending:'skickar', transition:'vad önskar du dig', begins:'det börjar', underway:'din önskan är på väg', again:'↩ igen' },
+  no: { gratitudePlaceholder:'hva er du takknemlig for?', wishPlaceholder:'skriv ønsket ditt her', send:'SEND', sending:'sender', transition:'hva ønsker du deg', begins:'det begynner', underway:'ønsket ditt er på vei', again:'↩ igjen' },
+  da: { gratitudePlaceholder:'hvad er du taknemmelig for?', wishPlaceholder:'skriv dit ønske her', send:'SEND', sending:'sender', transition:'hvad ønsker du dig', begins:'det begynder', underway:'dit ønske er på vej', again:'↩ igen' },
+  fi: { gratitudePlaceholder:'mistä olet kiitollinen?', wishPlaceholder:'kirjoita toiveesi tähän', send:'LÄHETÄ', sending:'lähetetään', transition:'mitä toivot', begins:'se alkaa', underway:'toiveesi on matkalla', again:'↩ uudelleen' },
+  cs: { gratitudePlaceholder:'za co jsi vděčný?', wishPlaceholder:'napiš své přání sem', send:'ODESLAT', sending:'odesílání', transition:'co si přeješ', begins:'začíná', underway:'tvé přání je na cestě', again:'↩ znovu' },
+  sk: { gratitudePlaceholder:'za čo si vďačný?', wishPlaceholder:'napíš svoje prianie sem', send:'ODOSLAŤ', sending:'odosiela sa', transition:'čo si želáš', begins:'začína', underway:'tvoje prianie je na ceste', again:'↩ znovu' },
+  hr: { gratitudePlaceholder:'za što si zahvalan?', wishPlaceholder:'napiši svoju želju ovdje', send:'POŠALJI', sending:'šalje se', transition:'što želiš', begins:'počinje', underway:'tvoja želja je na putu', again:'↩ ponovo' },
+  sr: { gratitudePlaceholder:'за шта си захвалан?', wishPlaceholder:'напиши своју жељу овде', send:'ПОШАЉИ', sending:'шаље се', transition:'шта желиш', begins:'почиње', underway:'твоја жеља је на путу', again:'↩ поново' },
+  bg: { gratitudePlaceholder:'за какво си благодарен?', wishPlaceholder:'напиши желанието си тук', send:'ИЗПРАТИ', sending:'изпраща се', transition:'какво желаеш', begins:'започва', underway:'желанието ти е по пътя', again:'↩ отново' },
+  el: { gratitudePlaceholder:'για τι είσαι ευγνώμων;', wishPlaceholder:'γράψε την επιθυμία σου εδώ', send:'ΑΠΟΣΤΟΛΗ', sending:'αποστέλλεται', transition:'τι επιθυμείς', begins:'αρχίζει', underway:'η επιθυμία σου είναι στο δρόμο', again:'↩ ξανά' },
+  tr: { gratitudePlaceholder:'neye minnettarsın?', wishPlaceholder:'dileğini buraya yaz', send:'GÖNDER', sending:'gönderiliyor', transition:'ne diliyorsun', begins:'başlıyor', underway:'dileğin yolda', again:'↩ tekrar' }
+};
+
+function detectLang() {
+  const bl = (navigator.language || 'en').slice(0,2).toLowerCase();
+  return T[bl] ? bl : 'en';
+}
+let lang = detectLang();
+function applyLang() {
+  const t = T[lang];
+  document.getElementById('gratitude').placeholder = t.gratitudePlaceholder;
+  document.getElementById('wish').placeholder = t.wishPlaceholder;
+  document.querySelectorAll('.send-btn').forEach(b => b.textContent = t.send);
+  document.getElementById('sending-label').textContent = t.sending;
+  document.getElementById('sending-w-label').textContent = t.sending;
+  document.getElementById('transition-label').textContent = t.transition;
+  document.getElementById('begins-label').textContent = t.begins;
+  document.getElementById('underway-label').textContent = t.underway;
+  document.getElementById('again-btn').textContent = t.again;
+}
+applyLang();
+
+const RAINBOW = ['#ff2244','#ff6600','#ffdd00','#44ff88','#00ccff','#aa44ff','#ff44aa'];
+
+function makeDots(id) {
+  const el = document.getElementById(id);
+  for (let i = 0; i < 7; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.style.background = RAINBOW[i];
+    el.appendChild(d);
+  }
+}
+makeDots('dots-g');
+makeDots('dots-w');
+
+function bindDots(taId, dotsId, btnId) {
+  const ta = document.getElementById(taId);
+  const btn = document.getElementById(btnId);
+  const dotsEl = document.getElementById(dotsId);
+  ta.addEventListener('input', () => {
+    const len = ta.value.trim().length;
+    btn.disabled = len === 0;
+    const dots = dotsEl.querySelectorAll('.dot');
+    const active = Math.min(7, Math.ceil((len/280)*7) + (len>0?1:0));
+    dots.forEach((d,i) => d.classList.toggle('v', i < active));
+  });
+}
+bindDots('gratitude','dots-g','send-g');
+bindDots('wish','dots-w','send-w');
+
+function goTo(id) {
+  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.querySelectorAll('.transition-text, .begins-text, .underway-text, .again-btn').forEach(e => {
+    e.style.animation = 'none';
+    e.offsetHeight;
+    e.style.animation = '';
+  });
+}
+
+// Canvas
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], animating = false;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; initStars(); }
+window.addEventListener('resize', resize);
+
+// Stars
+const STAR_COUNT = 38;
+let stars = [];
+function initStars() {
+  stars = [];
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.4,
+      alpha: Math.random() * 0.28 + 0.12,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: (Math.random() - 0.5) * 0.12,
+      twinkleSpeed: Math.random() * 0.008 + 0.003,
+      twinkleOffset: Math.random() * Math.PI * 2
+    });
+  }
+}
+function updateStars(t) {
+  stars.forEach(s => {
+    s.x += s.vx;
+    s.y += s.vy;
+    if (s.x < -2) s.x = W + 2;
+    if (s.x > W + 2) s.x = -2;
+    if (s.y < -2) s.y = H + 2;
+    if (s.y > H + 2) s.y = -2;
+  });
+}
+function drawStars(t) {
+  stars.forEach(s => {
+    const twinkle = Math.sin(t * s.twinkleSpeed + s.twinkleOffset) * 0.04;
+    ctx.globalAlpha = Math.max(0, s.alpha + twinkle);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8e4de';
+    ctx.fill();
+  });
+}
+
+let frameT = 0;
+resize();
+
+class PulseParticle {
+  constructor(cx, cy, color, delay) {
+    this.cx = cx; this.cy = cy; this.color = color;
+    this.r = 0;
+    this.maxR = Math.random() * 120 + 40;
+    this.life = 1.0;
+    this.decay = Math.random() * 0.004 + 0.003;
+    this.delay = delay;
+    this.started = false;
+    this.t = 0;
+  }
+  update() {
+    this.t++;
+    if (this.t < this.delay) return;
+    this.started = true;
+    this.r = Math.min(this.maxR, this.r + (this.maxR - this.r) * 0.045);
+    this.life = 1 - (this.r / this.maxR);
+  }
+  draw() {
+    if (!this.started) return;
+    const progress = this.r / this.maxR;
+    const alpha = progress < 0.3 ? 1 : 1 - ((progress - 0.3) / 0.7);
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(this.cx, this.cy, this.r, 0, Math.PI * 2);
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+}
+
+class DissolveParticle {
+  constructor(x, y, color) {
+    this.x = x; this.y = y; this.color = color;
+    this.r = Math.random() * 1.0 + 0.2;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 0.7 + 0.15;
+    this.vx = Math.cos(angle) * speed;
+    this.vy = Math.sin(angle) * speed;
+    this.life = Math.random() * 0.4 + 0.7;
+    this.decay = Math.random() * 0.0018 + 0.0008;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    this.vx *= 0.998; this.vy *= 0.998;
+    this.life -= this.decay;
+  }
+  draw() {
+    ctx.globalAlpha = this.life * 0.6;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+}
+
+function spawnPulse(x, y) {
+  const total = 6;
+  for (let i = 0; i < total; i++) {
+    const color = RAINBOW[Math.floor(Math.random() * RAINBOW.length)];
+    const delay = Math.floor(i * 18);
+    particles.push(new PulseParticle(x, y, color, delay));
+  }
+}
+function spawnDissolve(x, y, len) {
+  const count = Math.min(len * 10, 220);
+  for (let i = 0; i < count; i++) {
+    const color = RAINBOW[Math.floor(Math.random() * RAINBOW.length)];
+    particles.push(new DissolveParticle(x + (Math.random()-.5)*60, y + (Math.random()-.5)*60, color));
+  }
+}
+
+function loop() {
+  frameT++;
+  ctx.clearRect(0, 0, W, H);
+  updateStars(frameT);
+  drawStars(frameT);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => { p.update(); p.draw(); });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// Flow
+document.getElementById('send-g').addEventListener('click', () => {
+  const text = document.getElementById('gratitude').value.trim();
+  if (!text) return;
+  goTo('s-sending-g');
+  animating = true;
+  setTimeout(() => spawnPulse(W/2, H/2), 300);
+  // wait for rings to finish, pause, then transition
+  setTimeout(() => { animating = false; }, 3000);
+  setTimeout(() => { goTo('s-transition'); }, 3800);
+  setTimeout(() => { goTo('s-wish'); setTimeout(() => document.getElementById('wish').focus(), 400); }, 6600);
+});
+
+document.getElementById('send-w').addEventListener('click', () => {
+  const text = document.getElementById('wish').value.trim();
+  if (!text) return;
+  goTo('s-sending-w');
+  animating = true;
+  setTimeout(() => spawnDissolve(W/2, H/2, text.length), 400);
+  // wait for particles to fully die, pause in black, then done
+  setTimeout(() => { animating = false; }, 4000);
+  setTimeout(() => { goTo('s-done'); }, 4800);
+});
+
+document.getElementById('again-btn').addEventListener('click', () => {
+  document.getElementById('gratitude').value = '';
+  document.getElementById('wish').value = '';
+  document.querySelectorAll('.send-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.dot').forEach(d => d.classList.remove('v'));
+  particles = [];
+  goTo('s-gratitude');
+  setTimeout(() => document.getElementById('gratitude').focus(), 400);
+});
+
+// done
+
+</script>
+</body>
+</html>
